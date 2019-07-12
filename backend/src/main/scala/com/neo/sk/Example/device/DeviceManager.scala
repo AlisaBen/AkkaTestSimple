@@ -2,7 +2,10 @@ package com.neo.sk.Example.device
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
 import com.neo.sk.Example.device.DeviceGroup
-
+/**
+  * created  by byf on 2019.7.12
+  *
+  * */
 object DeviceManager{
   def props:Props = Props(new DeviceManager)
 
