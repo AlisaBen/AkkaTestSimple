@@ -3,7 +3,7 @@ package com.neo.sk.Example.device
 import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
 import akka.testkit.{TestKit, TestProbe}
 import com.neo.sk.Example.device.Device.{RecordTemperature, TemperatureRecorded}
-
+import org.scalatest._
 /**
   * created by byf on 2019.7.12
   * */
@@ -42,26 +42,34 @@ class Device(groupId:String,deviceId:String) extends Actor with ActorLogging{
 
 }
 
-object Test extends App{
+object Test
+  extends App
+  with Matchers
+  with WordSpecLike
+//  with BeforeAndAfterAll
+{
+  "" in {
+    val system = ActorSystem("device-system")
+    val probe = new TestProbe(system)
+    //  val system = ActorSystem("device-system")
+    val deviceActor = system.actorOf(Device.props("group","device"))
+    //  deviceActor ! Device.ReadTemperature(42)
 
-  val system = ActorSystem("device-system")
-  val probe = new TestProbe(system)
-//  val system = ActorSystem("device-system")
-  val deviceActor = system.actorOf(Device.props("group","device"))
-//  deviceActor ! Device.ReadTemperature(42)
+    deviceActor.tell(Device.ReadTemperature(42),probe.ref)
+    val response = probe.expectMsgType[Device.RespondTemperature]
+    response.requestId should === (42L)
+    response.value should === (None)
 
-  deviceActor.tell(Device.ReadTemperature(42),probe.ref)
-  val response = probe.expectMsgType[Device.RespondTemperature]
-  println(response.requestId)
-  println(response.value)
+    deviceActor.tell(Device.RecordTemperature(1,32),probe.ref)
+    probe.expectMsg(Device.TemperatureRecorded(1))
 
-  deviceActor.tell(Device.RecordTemperature(1,32),probe.ref)
-  probe.expectMsg(Device.TemperatureRecorded(1))
+    deviceActor.tell(Device.ReadTemperature(1),probe.ref)
+    val response2 = probe.expectMsgType[Device.RespondTemperature]
+    response2.requestId should === (1L)
+    response2.value should === (32)
+  }
 
-  deviceActor.tell(Device.ReadTemperature(1),probe.ref)
-  val response2 = probe.expectMsgType[Device.RespondTemperature]
-  println(response.requestId)
-  println(response.value)
+
 
 
 }
