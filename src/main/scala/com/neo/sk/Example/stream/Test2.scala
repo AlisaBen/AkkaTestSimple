@@ -19,7 +19,9 @@ object Test2 extends App {
       body
       .split(" ")
       .collect{
-        case t if t.startsWith("#") => Hashtag(t.replaceAll("[^#\\w]",""))
+        case t if t.startsWith("#") =>
+          println(t)
+          Hashtag(t.replaceAll("[^#\\w]",""))
       }
       .toSet
   }
